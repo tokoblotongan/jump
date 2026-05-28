@@ -12,7 +12,7 @@ bimbimImg.onload = function() {
 // --- 2. DATA UTAMA KARAKTER ---
 const player = {
     x: 100,
-    y: 250,
+    y: 230,
     width: 60,       
     height: 100,      
     speed: 4,
