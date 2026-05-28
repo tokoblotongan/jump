@@ -3,26 +3,35 @@ const ctx = canvas.getContext('2d');
 
 // --- 1. KONFIGURASI KARAKTER (BIMBIM) ---
 const player = {
-    x: 100,          // Posisi awal horizontal
-    y: 300,          // Posisi awal vertikal (di atas tanah)
-    width: 30,       // Lebar karakter
-    height: 50,      // Tinggi karakter
-    color: "#ff0000",// Warna merah (Representasi baju/topi Bimbim)
-    speed: 4,        // Kecepatan lari
-    velocityX: 0,    // Kecepatan gerak horizontal aktif
-    velocityY: 0,    // Kecepatan gerak vertikal aktif (untuk lompat)
-    jumping: false,  // Status apakah sedang melompat
-    grounded: false  // Status apakah sedang menyentuh tanah
+    x: 100,
+    y: 300,
+    width: 30,
+    height: 50,
+    color: "#ff0000",
+    speed: 4,
+    velocityX: 0,
+    velocityY: 0,
+    jumping: false,
+    grounded: false
 };
 
-// --- 2. KONFIGURASI DUNIA GAME ---
-const gravity = 0.5;   // Kekuatan gravitasi menarik karakter ke bawah
-const friction = 0.8;  // Efek gesekan agar pergerakan berhenti secara halus
+// --- 2. KONFIGURASI MUSUH (ULAR KECIL) ---
+const enemy = {
+    x: 700,          // Muncul di ujung kanan layar
+    y: 320,          // Di atas tanah (groundY - enemy.height)
+    width: 30,       // Lebar kotak ular
+    height: 30,      // Tinggi kotak ular
+    color: "#8B4513",// Warna Cokelat (Representasi ular)
+    speed: 1.5,      // Kecepatan berjalan otomatis ke kiri
+    alive: true      // Status hidup ular
+};
 
-// Batas tanah (Ground)
+// --- 3. KONFIGURASI DUNIA GAME ---
+const gravity = 0.5;
+const friction = 0.8;
 const groundY = 350;
 
-// --- 3. LOGIKA INPUT KEYBOARD ---
+// --- 4. LOGIKA INPUT KEYBOARD ---
 const keys = {};
 
 window.addEventListener('keydown', function(e) {
@@ -33,72 +42,110 @@ window.addEventListener('keyup', function(e) {
     keys[e.code] = false;
 });
 
-// --- 4. FUNGSI UPDATE LOGIKA GAME ---
+// --- FUNGSI RESET GAME (Jika Bimbim Kalah) ---
+function resetGame() {
+    // Kembalikan posisi Bimbim ke awal
+    player.x = 100;
+    player.y = 300;
+    player.velocityX = 0;
+    player.velocityY = 0;
+    
+    // Hidupkan kembali ular di posisi awal
+    enemy.x = 700;
+    enemy.alive = true;
+}
+
+// --- 5. FUNGSI UPDATE LOGIKA GAME ---
 function update() {
-    // Jalur input Kiri (ArrowLeft atau KeyA)
+    // Pergerakan Bimbim (Kiri / Kanan / Lompat)
     if (keys['ArrowLeft'] || keys['KeyA']) {
-        if (player.velocityX > -player.speed) {
-            player.velocityX--;
-        }
+        if (player.velocityX > -player.speed) player.velocityX--;
     }
-    // Jalur input Kanan (ArrowRight || KeyD)
     if (keys['ArrowRight'] || keys['KeyD']) {
-        if (player.velocityX < player.speed) {
-            player.velocityX++;
-        }
+        if (player.velocityX < player.speed) player.velocityX++;
     }
-    // Jalur input Lompat (Space atau ArrowUp)
     if ((keys['Space'] || keys['ArrowUp'] || keys['KeyW']) && !player.jumping && player.grounded) {
         player.jumping = true;
         player.grounded = false;
-        player.velocityY = -10; // Kekuatan lompatan ke atas (makin minus, makin tinggi)
+        player.velocityY = -10;
     }
 
-    // Terapkan gesekan (friction) dan gravitasi
+    // Fisika Bimbim
     player.velocityX *= friction;
     player.velocityY += gravity;
-
-    // Perbarui posisi karakter berdasarkan kecepatan
     player.x += player.velocityX;
     player.y += player.velocityY;
 
-    // Kunci karakter agar tidak keluar dari batas kiri/kanan layar
+    // Pembatas Layar untuk Bimbim
     if (player.x < 0) player.x = 0;
     if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
 
-    // Deteksi Tabrakan dengan Tanah
+    // Deteksi Bimbim Menyentuh Tanah
     if (player.y >= groundY - player.height) {
-        player.y = groundY - player.height; // Kunci kaki karakter di atas tanah
+        player.y = groundY - player.height;
         player.velocityY = 0;
         player.jumping = false;
         player.grounded = true;
     }
+
+    // --- LOGIKA PERGERAKAN & TABRAKAN ULAR ---
+    if (enemy.alive) {
+        // Ular berjalan otomatis ke kiri
+        enemy.x -= enemy.speed;
+
+        // Jika ular keluar dari batas kiri layar, munculkan lagi dari kanan (patroli)
+        if (enemy.x < -enemy.width) {
+            enemy.x = canvas.width + 50;
+        }
+
+        // DETEKSI TABRAKAN (AABB Collision)
+        if (
+            player.x < enemy.x + enemy.width &&
+            player.x + player.width > enemy.x &&
+            player.y < enemy.y + enemy.height &&
+            player.y + player.height > enemy.y
+        ) {
+            // Cek apakah kaki Bimbim berada di atas kepala ular (melompat menjatuhkan lawan)
+            // player.velocityY > 0 artinya Bimbim sedang dalam posisi jatuh ke bawah
+            if (player.y + player.height - player.velocityY <= enemy.y + 10 && player.velocityY > 0) {
+                enemy.alive = false;     // Ular kalah
+                player.velocityY = -6;   // Bimbim otomatis memantul sedikit ke atas setelah menginjak
+            } else {
+                // Jika tabrakan dari samping/bawah, Bimbim yang kalah
+                resetGame();
+            }
+        }
+    }
 }
 
-// --- 5. FUNGSI MENGGAMBAR (RENDER) ---
+// --- 6. FUNGSI MENGGAMBAR (RENDER) ---
 function draw() {
-    // Bersihkan layar
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Gambar Tanah (Ground)
+    // Gambar Tanah
     ctx.fillStyle = "#73bf43"; 
     ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
 
-    // Gambar Karakter Bimbim (Kotak Merah)
+    // Gambar Ular (Jika Masih Hidup)
+    if (enemy.alive) {
+        ctx.fillStyle = enemy.color;
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+    }
+
+    // Gambar Bimbim
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x, player.y, player.width, player.height);
     
-    // Opsional: Gambar kotak kecil putih di atasnya sebagai penanda "Topi" Bimbim
+    // Topi Bimbim (Kotak Putih Kecil)
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(player.x + 5, player.y + 5, player.width - 10, 10);
 }
 
-// --- 6. GAME LOOP UTAMA ---
+// --- 7. GAME LOOP UTAMA ---
 function gameLoop() {
-    update(); // Hitung matematika pergerakannya
-    draw();   // Gambar hasilnya ke layar
+    update();
+    draw();
     requestAnimationFrame(gameLoop);
 }
 
-// Jalankan game
 gameLoop();
