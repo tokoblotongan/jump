@@ -12,7 +12,7 @@ bimbimImg.onload = function() {
 // --- 2. DATA UTAMA KARAKTER ---
 const player = {
     x: 100,
-    y: 230,
+    y: 250,
     width: 60,       
     height: 100,      
     speed: 4,
@@ -23,7 +23,13 @@ const player = {
     isDead: false,
     deathTimer: 0
 };
-
+// --- MASUKKAN ANGKA HASIL DARI LESHY TOOL DI SINI ---
+    frameX: 0,          
+    frameY: 0,          
+    spriteWidth: 956,    // Diubah ke 956 agar pas dengan lebar asli gambar
+    spriteHeight: 1288,  // Diubah ke 1288 agar pas dengan tinggi asli gambar
+    animationTimer: 0,  
+    facing: "right"
 // --- 3. FUNGSI MENGGAMBAR PLAYER ---
 function drawPlayer(ctx) {
     if (currentCharacter === "bimbim") {
