@@ -1,20 +1,21 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// --- 1. KONFIGURASI KARAKTER (BIMBIM) ---
+// --- 1. CONFIGURASI SISTEM KARAKTER ---
+let currentCharacter = "bimbim"; // Karakter default di awal game
+
 const player = {
     x: 100,
     y: 300,
     width: 30,
     height: 50,
-    color: "#ff0000",
     speed: 4,
     velocityX: 0,
     velocityY: 0,
     jumping: false,
     grounded: false,
-    isDead: false,       // --- BARU: Status Bimbim kalah ---
-    deathTimer: 0        // --- BARU: Waktu tunggu sebelum reset game ---
+    isDead: false,
+    deathTimer: 0
 };
 
 // --- 2. KONFIGURASI MUSUH (ULAR KECIL) ---
@@ -25,10 +26,10 @@ const enemy = {
     height: 30,
     color: "#8B4513",
     speed: 1.5,
-    velocityX: 0,        // --- BARU: Kecepatan X saat terpental ---
-    velocityY: 0,        // --- BARU: Kecepatan Y saat terpental ---
-    alive: true,         // Menandakan ular masih hidup & berpatroli
-    isDefeated: false    // --- BARU: Menandakan ular sedang animasi terpental jatuh ---
+    velocityX: 0,
+    velocityY: 0,
+    alive: true,
+    isDefeated: false
 };
 
 // --- 3. KONFIGURASI DUNIA GAME ---
@@ -41,6 +42,16 @@ const keys = {};
 
 window.addEventListener('keydown', function(e) {
     keys[e.code] = true;
+    
+    // --- BARU: Tombol Angka 1 atau 2 untuk Ganti Karakter (Hanya bisa jika tidak sedang mati) ---
+    if (!player.isDead) {
+        if (e.code === 'Digit1') {
+            currentCharacter = "bimbim";
+        }
+        if (e.code === 'Digit2') {
+            currentCharacter = "chacha";
+        }
+    }
 });
 
 window.addEventListener('keyup', function(e) {
@@ -67,27 +78,23 @@ function resetGame() {
 // --- 5. FUNGSI UPDATE LOGIKA GAME ---
 function update() {
     
-    // --- KONDISI A: JIKA BIMBIM KALAH (TERPENTAL KE ATAS) ---
+    // KONDISI JIKA KARAKTER KALAH
     if (player.isDead) {
-        player.velocityY += 0.3; // Gravitasi lebih lambat saat melayang kalah
+        player.velocityY += 0.3;
         player.y += player.velocityY;
-        
         player.deathTimer++;
-        // Tunggu sekitar 2 detik (120 frame) sebelum game di-reset otomatis
         if (player.deathTimer > 120) {
             resetGame();
         }
-        
-        // Update animasi ular terpental juga jika ada saat bimbim mati
         if (enemy.isDefeated) {
             enemy.velocityY += gravity;
             enemy.x += enemy.velocityX;
             enemy.y += enemy.velocityY;
         }
-        return; // Lewati semua kontrol kodingan di bawah jika Bimbim mati
+        return;
     }
 
-    // Pergerakan Normal Bimbim (Hanya aktif jika tidak mati)
+    // Pergerakan Normal Player
     if (keys['ArrowLeft'] || keys['KeyA']) {
         if (player.velocityX > -player.speed) player.velocityX--;
     }
@@ -100,17 +107,15 @@ function update() {
         player.velocityY = -10;
     }
 
-    // Fisika Dasar Bimbim
+    // Fisika Player
     player.velocityX *= friction;
     player.velocityY += gravity;
     player.x += player.velocityX;
     player.y += player.velocityY;
 
-    // Pembatas Layar untuk Bimbim
     if (player.x < 0) player.x = 0;
     if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
 
-    // Deteksi Bimbim Menyentuh Tanah
     if (player.y >= groundY - player.height) {
         player.y = groundY - player.height;
         player.velocityY = 0;
@@ -118,45 +123,37 @@ function update() {
         player.grounded = true;
     }
 
-    // --- LOGIKA PERGERAKAN & FISIKA ULAR ---
+    // Logika Ular
     if (enemy.alive) {
-        // Ular berjalan normal ke kiri
         enemy.x -= enemy.speed;
-
         if (enemy.x < -enemy.width) {
             enemy.x = canvas.width + 50;
         }
 
-        // DETEKSI TABRAKAN
+        // Deteksi Tabrakan
         if (
             player.x < enemy.x + enemy.width &&
             player.x + player.width > enemy.x &&
             player.y < enemy.y + enemy.height &&
             player.y + player.height > enemy.y
         ) {
-            // JIKA BIMBIM BERHASIL MENGINJAK ULAR
             if (player.y + player.height - player.velocityY <= enemy.y + 10 && player.velocityY > 0) {
                 enemy.alive = false;
                 enemy.isDefeated = true; 
-                enemy.velocityY = -5;       // --- BARU: Ular memantul ke atas sedikit sebelum jatuh ---
-                enemy.velocityX = player.velocityX * 0.5; // --- BARU: Ular terdorong ke arah lari Bimbim ---
-                
-                player.velocityY = -6;     // Bimbim memantul ke atas
+                enemy.velocityY = -5;
+                enemy.velocityX = player.velocityX * 0.5;
+                player.velocityY = -6;
             } else {
-                // JIKA BIMBIM KALAH (TERKENA DARI SAMPING)
                 player.isDead = true;
-                player.velocityY = -8;     // --- BARU: Bimbim melayang terpental ke atas ---
+                player.velocityY = -8;
                 player.velocityX = 0;
             }
         }
     } 
-    // --- BARU: JIKA ULAR SUDAH KALAH (ANIMASI JATUH MENEMBUS TANAH) ---
     else if (enemy.isDefeated) {
-        enemy.velocityY += gravity; // Terkena gravitasi dunia
+        enemy.velocityY += gravity;
         enemy.x += enemy.velocityX;
         enemy.y += enemy.velocityY;
-
-        // Jika ular sudah jatuh keluar dari bawah layar, hentikan kalkulasi
         if (enemy.y > canvas.height) {
             enemy.isDefeated = false;
         }
@@ -171,19 +168,40 @@ function draw() {
     ctx.fillStyle = "#73bf43"; 
     ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
 
-    // Gambar Ular (Digambar jika hidup ATAU sedang dalam proses terpental jatuh)
+    // Gambar Ular
     if (enemy.alive || enemy.isDefeated) {
         ctx.fillStyle = enemy.color;
         ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
     }
 
-    // Gambar Bimbim
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-    
-    // Topi Bimbim (Kotak Putih Kecil)
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(player.x + 5, player.y + 5, player.width - 10, 10);
+    // --- BARU: LOGIKA GAMBAR BERDASARKAN KARAKTER YANG DIPILIH ---
+    if (currentCharacter === "bimbim") {
+        // Gambar Bimbim (Badan Merah)
+        ctx.fillStyle = "#ff0000";
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+        
+        // Topi Putih Bimbim
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(player.x + 5, player.y + 5, player.width - 10, 10);
+    } else if (currentCharacter === "chacha") {
+        // Gambar Chacha (Badan Merah Muda/Pink)
+        ctx.fillStyle = "#ffb6c1";
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+        
+        // Rok Merah Chacha (Kotak merah di bagian bawah badan)
+        ctx.fillStyle = "#ff0000";
+        ctx.fillRect(player.x, player.y + 35, player.width, 15);
+        
+        // Rambut Hitam Bob Chacha (Kotak hitam di bagian atas kepala)
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(player.x - 2, player.y, player.width + 4, 12);
+    }
+
+    // Teks Petunjuk di Layar
+    ctx.fillStyle = "white";
+    ctx.font = "14px Arial";
+    ctx.fillText("Karakter Aktif: " + currentCharacter.toUpperCase(), 20, 30);
+    ctx.fillText("Tekan [1] untuk Bimbim | Tekan [2] untuk Chacha", 20, 50);
 }
 
 // --- 7. GAME LOOP UTAMA ---
