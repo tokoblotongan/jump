@@ -16,19 +16,19 @@ function enemySpriteLoaded() {
     enemyLoadedCount++;
     if (enemyLoadedCount === 3) {
         enemySpritesLoaded = true;
-        console.log("Semua 3 animasi ular berhasil dimuat!");
+        console.log("Semua 3 animasi ular berhasil dimuat dengan skala raksasa 160%!");
     }
 }
 enemySprites.A.onload = enemySpriteLoaded;
 enemySprites.B.onload = enemySpriteLoaded;
 enemySprites.C.onload = enemySpriteLoaded;
 
-// --- 2. DATA UTAMA MUSUH (ULAR) ---
+// --- 2. DATA UTAMA MUSUH (ULAR DI-SCALE 160%) ---
 const enemy = {
     x: 700,
-    y: 320,             // Berdiri pas di atas tanah (groundY - enemy.height)
-    width: 40,          // Lebar standar ular di game (bisa disesuaikan nanti)
-    height: 30,         // Tinggi standar ular di game (bisa disesuaikan nanti)
+    y: 302,             // DISESUAIKAN PRESISI: Turun ke 302 agar perut ular pas menempel di tanah (350 - 48)
+    width: 64,          // PERBESAR 160%: Dari 40 menjadi 64
+    height: 48,         // PERBESAR 160%: Dari 30 menjadi 48
     speed: 2,
     velocityX: 0,
     velocityY: 0,
@@ -45,12 +45,11 @@ function drawEnemy(ctx) {
     if (enemy.alive) {
         if (enemySpritesLoaded) {
             
-            // ============================================================
             // LOGIKA OTOMATIS BERGANTI GERAKAN (A -> B -> C -> A)
-            // ============================================================
             enemy.animationTimer++;
             if (enemy.animationTimer > 12) { // Kecepatan merayap ular (makin kecil makin cepat)
                 if (enemy.currentPose === "A") {
+                    
                     enemy.currentPose = "B";
                 } else if (enemy.currentPose === "B") {
                     enemy.currentPose = "C";
@@ -59,12 +58,11 @@ function drawEnemy(ctx) {
                 }
                 enemy.animationTimer = 0;
             }
-            // ============================================================
 
-            // Ambil gambar ular yang sedang aktif berdasarkan timer
+            // Ambil gambar ular yang sedang aktif
             let activeEnemyImage = enemySprites[enemy.currentPose];
             
-            // Gambar ular menghadap ke kiri (karena musuh berjalan dari kanan ke kiri)
+            // Gambar ular besar di atas tanah menghadap ke kiri
             ctx.drawImage(activeEnemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
 
         } else {
@@ -78,7 +76,7 @@ function drawEnemy(ctx) {
         let activeEnemyImage = enemySprites[enemy.currentPose];
         ctx.save();
         ctx.translate(enemy.x, enemy.y + enemy.height);
-        ctx.scale(1, -1); // Membalik gambar ke bawah saat kalah
+        ctx.scale(1, -1); 
         ctx.drawImage(activeEnemyImage, 0, 0, enemy.width, enemy.height);
         ctx.restore();
     }
