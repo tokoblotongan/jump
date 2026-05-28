@@ -20,7 +20,7 @@ function spriteLoaded() {
     loadedCount++;
     if (loadedCount === 4) {
         spritesLoaded = true;
-        console.log("Semua 4 animasi Bimbim berhasil dimuat dengan kompensasi skala!");
+        console.log("Semua 4 animasi Bimbim berhasil dimuat dengan penyesuaian tanah!");
     }
 }
 bimbimSprites.A.onload = spriteLoaded;
@@ -78,24 +78,24 @@ function drawPlayer(ctx) {
             let drawHeight = player.height;
             let drawY = player.y;
 
-            // KONDISI KHUSUS: Mengompensasi padding gambar bimbimD.png yang terlalu luas
+            // KONDISI KHUSUS: Ukuran bimbimD diperbesar, posisi Y diturunkan agar pas menyentuh tanah
             if (player.currentPose === "D") {
                 drawWidth = player.width * 1.25;   // Lebar diperbesar 25%
                 drawHeight = player.height * 1.20; // Tinggi diperbesar 20%
                 
-                // Geser posisi render Y ke bawah agar kaki tidak melayang aneh akibat kompensasi tinggi baru
-                drawY = player.y - (drawHeight - player.height);
+                // --- PERBAIKAN DI SINI ---
+                // Mengurangi pengali dari (1.0) menjadi (0.6) membuat posisi karakter turun mantap menyentuh tanah
+                drawY = player.y - ((drawHeight - player.height) * 0.6);
             }
 
             ctx.save();
             if (player.facing === "left") {
                 // Membalikkan gambar secara horizontal jika berjalan ke kiri
-                // Memakai drawWidth baru agar poros rotasi pas di tengah badan baru Bimbim
                 ctx.translate(player.x + drawWidth, drawY);
                 ctx.scale(-1, 1);
                 ctx.drawImage(activeImage, 0, 0, drawWidth, drawHeight);
             } else {
-                // Normal menghadap kanan (menggunakan variabel drawWidth, drawHeight, dan drawY hasil kompensasi)
+                // Normal menghadap kanan
                 ctx.drawImage(activeImage, player.x, drawY, drawWidth, drawHeight);
             }
             ctx.restore();
