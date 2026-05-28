@@ -16,19 +16,19 @@ function enemySpriteLoaded() {
     enemyLoadedCount++;
     if (enemyLoadedCount === 3) {
         enemySpritesLoaded = true;
-        console.log("Semua 3 animasi ular berhasil dimuat dengan skala raksasa 160%!");
+        console.log("Semua 3 animasi ular berhasil dimuat dengan skala penuh 200%!");
     }
 }
 enemySprites.A.onload = enemySpriteLoaded;
 enemySprites.B.onload = enemySpriteLoaded;
 enemySprites.C.onload = enemySpriteLoaded;
 
-// --- 2. DATA UTAMA MUSUH (ULAR DI-SCALE 160%) ---
+// --- 2. DATA UTAMA MUSUH (ULAR DI-SCALE 200%) ---
 const enemy = {
     x: 700,
-    y: 302,             // DISESUAIKAN PRESISI: Turun ke 302 agar perut ular pas menempel di tanah (350 - 48)
-    width: 64,          // PERBESAR 160%: Dari 40 menjadi 64
-    height: 48,         // PERBESAR 160%: Dari 30 menjadi 48
+    y: 290,             // PRESISI 200%: Diatur ke 290 agar perut ular pas menempel di tanah (350 - 60)
+    width: 80,          // PERBESAR 200%: Dari 40 menjadi 80
+    height: 60,         // PERBESAR 200%: Dari 30 menjadi 60
     speed: 2,
     velocityX: 0,
     velocityY: 0,
@@ -47,9 +47,8 @@ function drawEnemy(ctx) {
             
             // LOGIKA OTOMATIS BERGANTI GERAKAN (A -> B -> C -> A)
             enemy.animationTimer++;
-            if (enemy.animationTimer > 12) { // Kecepatan merayap ular (makin kecil makin cepat)
+            if (enemy.animationTimer > 12) { // Kecepatan merayap ular
                 if (enemy.currentPose === "A") {
-                    
                     enemy.currentPose = "B";
                 } else if (enemy.currentPose === "B") {
                     enemy.currentPose = "C";
@@ -62,7 +61,7 @@ function drawEnemy(ctx) {
             // Ambil gambar ular yang sedang aktif
             let activeEnemyImage = enemySprites[enemy.currentPose];
             
-            // Gambar ular besar di atas tanah menghadap ke kiri
+            // Gambar ular raksasa di atas tanah menghadap ke kiri
             ctx.drawImage(activeEnemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
 
         } else {
