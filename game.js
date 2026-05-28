@@ -110,7 +110,7 @@ function draw() {
     ctx.fillStyle = "#73bf43"; 
     ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
 
-    // Panggil fungsi gambar dari file modul masing-masing
+    // Panggil fungsi gambar dari modul js/
     drawEnemy(ctx);
     drawPlayer(ctx);
 
