@@ -20,7 +20,7 @@ function spriteLoaded() {
     loadedCount++;
     if (loadedCount === 4) {
         spritesLoaded = true;
-        console.log("Semua 4 animasi Bimbim berhasil dimuat!");
+        console.log("Semua 4 animasi Bimbim berhasil dimuat dengan kompensasi skala!");
     }
 }
 bimbimSprites.A.onload = spriteLoaded;
@@ -32,8 +32,8 @@ bimbimSprites.D.onload = spriteLoaded;
 const player = {
     x: 100,
     y: 250,             // Berdiri pas di atas tanah
-    width: 60,          // Lebar skala besar
-    height: 100,        // Tinggi skala besar
+    width: 60,          // Lebar standar skala besar
+    height: 100,        // Tinggi standar skala besar
     speed: 4,
     velocityX: 0,
     velocityY: 0,
@@ -50,44 +50,53 @@ const player = {
 
 // --- 3. FUNGSI MENGGAMBAR & MENGANIMASIKAN GERAKAN ---
 function drawPlayer(ctx) {
-    // Menentukan arah hadap
+    // Menentukan arah hadap berdasarkan pergerakan horizontal
     if (player.velocityX > 0.1) player.facing = "right";
     if (player.velocityX < -0.1) player.facing = "left";
 
     if (currentCharacter === "bimbim") {
         if (spritesLoaded) {
             
-            // ============================================================
             // LOGIKA PERGANTIAN GAMBAR SECARA OTOMATIS
-            // ============================================================
             if (!player.grounded) {
-                // JIKA MELOMPAT: Gunakan file bimbimD.png
-                player.currentPose = "D";
+                player.currentPose = "D"; // JIKA MELOMPAT
             } else if (Math.abs(player.velocityX) > 0.2) {
-                // JIKA BERJALAN: Bergantian antara bimbimB.png dan bimbimC.png
                 player.animationTimer++;
-                if (player.animationTimer > 10) { // Kecepatan ganti kaki (makin kecil makin cepat)
+                if (player.animationTimer > 10) { // Kecepatan ganti kaki
                     player.currentPose = (player.currentPose === "B") ? "C" : "B";
                     player.animationTimer = 0;
                 }
             } else {
-                // JIKA DIAM: Kembali ke bimbimA.png
-                player.currentPose = "A";
+                player.currentPose = "A"; // JIKA DIAM
             }
-            // ============================================================
 
-            // Ambil gambar yang sedang aktif berdasarkan logika di atas
+            // Ambil gambar yang sedang aktif
             let activeImage = bimbimSprites[player.currentPose];
+
+            // VARIABEL SEMENTARA UNTUK MENAMPUNG UKURAN RENDER CANVAS
+            let drawWidth = player.width;
+            let drawHeight = player.height;
+            let drawY = player.y;
+
+            // KONDISI KHUSUS: Mengompensasi padding gambar bimbimD.png yang terlalu luas
+            if (player.currentPose === "D") {
+                drawWidth = player.width * 1.25;   // Lebar diperbesar 25%
+                drawHeight = player.height * 1.20; // Tinggi diperbesar 20%
+                
+                // Geser posisi render Y ke bawah agar kaki tidak melayang aneh akibat kompensasi tinggi baru
+                drawY = player.y - (drawHeight - player.height);
+            }
 
             ctx.save();
             if (player.facing === "left") {
                 // Membalikkan gambar secara horizontal jika berjalan ke kiri
-                ctx.translate(player.x + player.width, player.y);
+                // Memakai drawWidth baru agar poros rotasi pas di tengah badan baru Bimbim
+                ctx.translate(player.x + drawWidth, drawY);
                 ctx.scale(-1, 1);
-                ctx.drawImage(activeImage, 0, 0, player.width, player.height);
+                ctx.drawImage(activeImage, 0, 0, drawWidth, drawHeight);
             } else {
-                // Normal menghadap kanan
-                ctx.drawImage(activeImage, player.x, player.y, player.width, player.height);
+                // Normal menghadap kanan (menggunakan variabel drawWidth, drawHeight, dan drawY hasil kompensasi)
+                ctx.drawImage(activeImage, player.x, drawY, drawWidth, drawHeight);
             }
             ctx.restore();
 
