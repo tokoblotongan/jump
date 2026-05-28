@@ -22,7 +22,7 @@ const player = {
     grounded: false,
     isDead: false,
     deathTimer: 0
-};
+
 // --- MASUKKAN ANGKA HASIL DARI LESHY TOOL DI SINI ---
     frameX: 0,          
     frameY: 0,          
@@ -30,6 +30,7 @@ const player = {
     spriteHeight: 1288,  // Diubah ke 1288 agar pas dengan tinggi asli gambar
     animationTimer: 0,  
     facing: "right"
+};
 // --- 3. FUNGSI MENGGAMBAR PLAYER ---
 function drawPlayer(ctx) {
     if (currentCharacter === "bimbim") {
