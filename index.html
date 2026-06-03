@@ -3,22 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Petualangan Bimbim & Chacha</title>
+
+    <title>Bimbim & Chacha - Petualangan ke Sekolah</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div id="game-container">
-        <!-- Canvas tempat game dirender -->
+
         <canvas id="gameCanvas" width="800" height="400"></canvas>
-        <p>Gunakan tombol panah <b>Kiri / Kanan</b> untuk bergerak, dan <b>Spasi</b> untuk melompat.</p>
+
+        <div id="info">
+            <p>
+                ← → atau A D = Bergerak |
+                SPACE = Lompat |
+                1 = Bimbim |
+                2 = Chacha
+            </p>
+        </div>
+
     </div>
+
+    <!-- Konfigurasi Game -->
     <script src="js/config.js"></script>
+
+    <!-- Data Level -->
+    <script src="js/level1.js"></script>
+
+    <!-- Karakter -->
     <script src="js/player.js"></script>
+
+    <!-- Musuh -->
     <script src="js/enemy.js"></script>
-    
+
+    <!-- Engine Utama -->
     <script src="game.js"></script>
-</body>
-</html>
-    <script src="game.js"></script>
+
 </body>
 </html>
