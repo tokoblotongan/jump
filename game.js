@@ -275,64 +275,72 @@ function draw() {
 
     for (const p of level1.platforms) {
 
-        // TANAH
+        for (const p of level1.platforms) {
 
-        if (p.h >= 300) {
+    // =====================
+    // TANAH BESAR
+    // =====================
 
-            ctx.fillStyle = "#73bf43";
+    if (p.w > 500) {
 
-            ctx.fillRect(
-                p.x,
-                p.y,
-                p.w,
-                p.h
-            );
-        }
+        ctx.fillStyle = "#73bf43";
 
-        // BUKU
-
-        else if (p.w === 120 && p.h === 50) {
-
-            ctx.drawImage(
-                notebookPlatformImg,
-                p.x,
-                p.y,
-                p.w,
-                p.h
-            );
-        }
-
-        // PENGGARIS
-
-        else if (p.w === 180 && p.h === 30) {
-
-            ctx.drawImage(
-                rulerPlatformImg,
-                p.x,
-                p.y,
-                p.w,
-                p.h
-            );
-        }
-
-        // KOTAK PENSIL
-
-        else {
-
-            ctx.drawImage(
-                pencilPlatformImg,
-                p.x,
-                p.y,
-                p.w,
-                p.h
-            );
-        }
+        ctx.fillRect(
+            p.x,
+            p.y,
+            p.w,
+            p.h
+        );
     }
 
-    drawEnemy(ctx);
-    drawPlayer(ctx);
+    // =====================
+    // NOTEBOOK PLATFORM
+    // 320 x 175
+    // =====================
 
-    ctx.restore();
+    else if (p.w === 120 && p.h === 50) {
+
+        ctx.drawImage(
+            notebookPlatformImg,
+            p.x - 100,
+            p.y - 125,
+            320,
+            175
+        );
+    }
+
+    // =====================
+    // RULER PLATFORM
+    // 350 x 190
+    // =====================
+
+    else if (p.w === 180 && p.h === 30) {
+
+        ctx.drawImage(
+            rulerPlatformImg,
+            p.x - 85,
+            p.y - 150,
+            350,
+            190
+        );
+    }
+
+    // =====================
+    // PENCIL PLATFORM
+    // 380 x 210
+    // =====================
+
+    else {
+
+        ctx.drawImage(
+            pencilPlatformImg,
+            p.x - 120,
+            p.y - 170,
+            380,
+            210
+        );
+    }
+}
 
     // HUD
 
